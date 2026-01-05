@@ -50,10 +50,6 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [brands]);
 
-  // Handle admin access from search bar
-  const handleAdminAccess = () => {
-    navigate('/admin');
-  };
 
   // Scroll detection for button text and fixed header
   useEffect(() => {
@@ -112,7 +108,6 @@ const Home = () => {
             setSelectedBrand(brand);
             setIsModalOpen(true);
           }}
-          onAdminAccess={handleAdminAccess}
         />
       </div>
 

@@ -860,6 +860,12 @@ body {
   gap: 20px;
 }
 
+.admin-header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .admin-header-left {
   display: flex;
   flex-direction: column;
@@ -888,6 +894,23 @@ body {
   font-size: 36px;
   text-align: left;
   margin: 0;
+}
+
+.export-button {
+  padding: 10px 20px;
+  background: rgba(29, 161, 242, 0.2);
+  border: 1px solid rgba(29, 161, 242, 0.4);
+  border-radius: 8px;
+  color: #1da1f2;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.export-button:hover {
+  background: rgba(29, 161, 242, 0.3);
 }
 
 .logout-button {

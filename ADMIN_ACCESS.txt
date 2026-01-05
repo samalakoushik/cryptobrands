@@ -1,21 +1,30 @@
 ═══════════════════════════════════════════════════════════════
-  HIDDEN ADMIN ACCESS - KEEP THIS SECRET!
+  ADMIN ACCESS
 ═══════════════════════════════════════════════════════════════
 
-The admin link has been hidden from the homepage.
+Admin dashboard is directly accessible via URL.
 
 To access the admin dashboard:
 
-  1. Type "admin" in the search bar
-  2. Press Enter
+  Simply navigate to: /admin
 
-This will take you directly to the admin login page.
+  Example:
+  - Local: http://localhost:3000/admin
+  - Live: https://your-domain.vercel.app/admin
 
 ═══════════════════════════════════════════════════════════════
 
 Login Credentials:
   Username: admin
   Password: 200345i
+
+═══════════════════════════════════════════════════════════════
+
+Features:
+  - Add/Edit/Delete brands
+  - Upload brand logos
+  - Export brand data to JSON
+  - Search brands
 
 ═══════════════════════════════════════════════════════════════
 

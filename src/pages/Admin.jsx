@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import brandsData from '../data/brands.json';
 import AdminLogin from '../components/AdminLogin';
+import { exportLocalStorageData } from '../utils/dataMigration';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -243,9 +244,25 @@ const Admin = () => {
           <Link to="/" className="back-to-home-link">← Back to Home</Link>
           <h1 className="admin-title">Admin Dashboard</h1>
         </div>
-        <button className="logout-button" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="admin-header-right">
+          <button 
+            className="export-button" 
+            onClick={() => {
+              const exported = exportLocalStorageData();
+              if (exported) {
+                alert(`Exported ${exported.length} brand(s)! Check your downloads folder for brands-data.json`);
+              } else {
+                alert('No data to export. Add brands first.');
+              }
+            }}
+            title="Export brand data to JSON file"
+          >
+            Export Data
+          </button>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </div>
       
       <form className="admin-form" onSubmit={handleSubmit}>
