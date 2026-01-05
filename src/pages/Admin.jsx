@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import brandsData from '../data/brands.json';
 import AdminLogin from '../components/AdminLogin';
 
@@ -238,7 +239,10 @@ const Admin = () => {
   return (
     <div className="admin-container">
       <div className="admin-header">
-        <h1 className="admin-title">Admin Dashboard</h1>
+        <div className="admin-header-left">
+          <Link to="/" className="back-to-home-link">← Back to Home</Link>
+          <h1 className="admin-title">Admin Dashboard</h1>
+        </div>
         <button className="logout-button" onClick={handleLogout}>
           Logout
         </button>

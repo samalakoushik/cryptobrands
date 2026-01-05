@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import BrandCard from '../components/BrandCard';
 import BrandModal from '../components/BrandModal';
@@ -96,7 +97,12 @@ const Home = () => {
 
   return (
     <div className="container">
-      <h1 className="page-title">Crypto Brands' X Affiliate Spends</h1>
+      <div className="header-top">
+        <h1 className="page-title">Crypto Brands' X Affiliate Spends</h1>
+        <Link to="/admin" className="admin-link">
+          Admin
+        </Link>
+      </div>
       
       <div className="search-container">
         <SearchBar 
