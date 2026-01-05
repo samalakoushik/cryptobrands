@@ -10,7 +10,7 @@ const Home = () => {
   const [showAll, setShowAll] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState('down');
+  const [, setScrollDirection] = useState('down');
   const [isFixed, setIsFixed] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
