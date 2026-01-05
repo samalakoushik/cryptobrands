@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import BrandCard from '../components/BrandCard';
 import BrandModal from '../components/BrandModal';
 import brandsData from '../data/brands.json';
 
 const Home = () => {
-  const navigate = useNavigate();
   const [brands, setBrands] = useState([]);
   const [sortBy, setSortBy] = useState('spend-high');
   const [showAll, setShowAll] = useState(false);
