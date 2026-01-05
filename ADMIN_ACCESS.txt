@@ -1,0 +1,20 @@
+═══════════════════════════════════════════════════════════════
+  HIDDEN ADMIN ACCESS - KEEP THIS SECRET!
+═══════════════════════════════════════════════════════════════
+
+The admin link has been hidden from the homepage.
+
+To access the admin dashboard:
+
+  Press: Ctrl + Shift + A
+
+This will take you directly to the admin login page.
+
+═══════════════════════════════════════════════════════════════
+
+Login Credentials:
+  Username: admin
+  Password: 200345i
+
+═══════════════════════════════════════════════════════════════
+

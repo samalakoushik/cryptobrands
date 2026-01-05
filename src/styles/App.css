@@ -24,46 +24,17 @@ body {
   position: relative;
 }
 
-.header-top {
-  position: relative;
-  margin-bottom: 40px;
-}
-
 .page-title {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   font-size: 72px;
-  margin-bottom: 0;
+  margin-bottom: 40px;
   text-align: center;
   color: #ffffff;
   line-height: 1.2;
   word-wrap: break-word;
   overflow-wrap: break-word;
   padding: 0 20px;
-}
-
-.admin-link {
-  position: absolute;
-  top: 0;
-  right: 20px;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-  text-decoration: none;
-  padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-}
-
-.admin-link:hover {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
 }
 
 .search-container {

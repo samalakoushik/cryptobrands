@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import BrandCard from '../components/BrandCard';
 import BrandModal from '../components/BrandModal';
 import brandsData from '../data/brands.json';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [brands, setBrands] = useState([]);
   const [sortBy, setSortBy] = useState('spend-high');
   const [showAll, setShowAll] = useState(false);
@@ -48,6 +49,20 @@ const Home = () => {
     }, 500);
     return () => clearInterval(interval);
   }, [brands]);
+
+  // Hidden admin access: Keyboard shortcut (Ctrl+Shift+A)
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Ctrl+Shift+A to access admin
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        navigate('/admin');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [navigate]);
 
   // Scroll detection for button text and fixed header
   useEffect(() => {
@@ -97,12 +112,7 @@ const Home = () => {
 
   return (
     <div className="container">
-      <div className="header-top">
-        <h1 className="page-title">Crypto Brands' X Affiliate Spends</h1>
-        <Link to="/admin" className="admin-link">
-          Admin
-        </Link>
-      </div>
+      <h1 className="page-title">Crypto Brands' X Affiliate Spends</h1>
       
       <div className="search-container">
         <SearchBar 
