@@ -6,7 +6,8 @@ The admin link has been hidden from the homepage.
 
 To access the admin dashboard:
 
-  Press: Ctrl + Shift + A
+  1. Type "admin" in the search bar
+  2. Press Enter
 
 This will take you directly to the admin login page.
 

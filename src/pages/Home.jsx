@@ -50,19 +50,10 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [brands]);
 
-  // Hidden admin access: Keyboard shortcut (Ctrl+Shift+A)
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      // Ctrl+Shift+A to access admin
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-        e.preventDefault();
-        navigate('/admin');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [navigate]);
+  // Handle admin access from search bar
+  const handleAdminAccess = () => {
+    navigate('/admin');
+  };
 
   // Scroll detection for button text and fixed header
   useEffect(() => {
@@ -121,6 +112,7 @@ const Home = () => {
             setSelectedBrand(brand);
             setIsModalOpen(true);
           }}
+          onAdminAccess={handleAdminAccess}
         />
       </div>
 

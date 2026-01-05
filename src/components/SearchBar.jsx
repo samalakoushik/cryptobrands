@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const SearchBar = ({ brands, onBrandSelect }) => {
+const SearchBar = ({ brands, onBrandSelect, onAdminAccess }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBrands, setFilteredBrands] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -41,6 +41,18 @@ const SearchBar = ({ brands, onBrandSelect }) => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    // Check if Enter is pressed and search term is "admin"
+    if (e.key === 'Enter' && searchTerm.trim().toLowerCase() === 'admin') {
+      e.preventDefault();
+      setSearchTerm('');
+      setShowResults(false);
+      if (onAdminAccess) {
+        onAdminAccess();
+      }
+    }
+  };
+
   return (
     <div className="search-bar" ref={searchRef}>
       <div className="search-input-wrapper">
@@ -51,6 +63,7 @@ const SearchBar = ({ brands, onBrandSelect }) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => searchTerm && setShowResults(true)}
+          onKeyDown={handleKeyDown}
         />
         <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
