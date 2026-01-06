@@ -1,7 +1,20 @@
 import { supabase } from './supabaseClient';
+import brandsData from '../data/brands.json';
 
-// Get all brands
+// Check if Supabase is configured
+const isSupabaseConfigured = () => {
+  const url = process.env.REACT_APP_SUPABASE_URL;
+  const key = process.env.REACT_APP_SUPABASE_ANON_KEY;
+  return url && key && url !== 'https://placeholder.supabase.co' && key !== 'placeholder-key';
+};
+
+// Get all brands - fallback to brands.json if Supabase not configured
 export const getBrands = async () => {
+  // If Supabase not configured, use brands.json
+  if (!isSupabaseConfigured()) {
+    return brandsData.brands || [];
+  }
+
   try {
     const { data, error } = await supabase
       .from('brands')
@@ -9,12 +22,17 @@ export const getBrands = async () => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching brands:', error);
-      throw error;
+      console.error('Error fetching brands from Supabase, falling back to brands.json:', error);
+      return brandsData.brands || [];
+    }
+
+    // If Supabase returns empty, fallback to brands.json
+    if (!data || data.length === 0) {
+      return brandsData.brands || [];
     }
 
     // Transform to match your current data structure
-    return (data || []).map(brand => ({
+    return data.map(brand => ({
       id: brand.id,
       name: brand.name,
       username: brand.username,
@@ -23,13 +41,17 @@ export const getBrands = async () => {
       logoUrl: brand.logo_url
     }));
   } catch (error) {
-    console.error('Error in getBrands:', error);
-    return []; // Return empty array on error
+    console.error('Error in getBrands, falling back to brands.json:', error);
+    return brandsData.brands || [];
   }
 };
 
-// Add a brand
+// Add a brand - only works if Supabase is configured
 export const addBrand = async (brand) => {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase not configured. Please set up Supabase first.');
+  }
+
   const { data, error } = await supabase
     .from('brands')
     .insert({
@@ -57,8 +79,12 @@ export const addBrand = async (brand) => {
   };
 };
 
-// Update a brand
+// Update a brand - only works if Supabase is configured
 export const updateBrand = async (id, brand) => {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase not configured. Please set up Supabase first.');
+  }
+
   const { data, error } = await supabase
     .from('brands')
     .update({
@@ -88,8 +114,12 @@ export const updateBrand = async (id, brand) => {
   };
 };
 
-// Delete a brand
+// Delete a brand - only works if Supabase is configured
 export const deleteBrand = async (id) => {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase not configured. Please set up Supabase first.');
+  }
+
   const { error } = await supabase
     .from('brands')
     .delete()
@@ -101,8 +131,13 @@ export const deleteBrand = async (id) => {
   }
 };
 
-// Subscribe to real-time changes
+// Subscribe to real-time changes - only if Supabase is configured
 export const subscribeToBrands = (callback) => {
+  if (!isSupabaseConfigured()) {
+    // Return a no-op unsubscribe function
+    return () => {};
+  }
+
   const subscription = supabase
     .channel('brands-changes')
     .on('postgres_changes', 

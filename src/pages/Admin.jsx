@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLogin from '../components/AdminLogin';
+import brandsData from '../data/brands.json';
 import { getBrands, addBrand, updateBrand, deleteBrand, subscribeToBrands } from '../utils/brandsService';
+import { syncBrandsToGitHub } from '../utils/githubSync';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -18,17 +20,47 @@ const Admin = () => {
   });
   const [logoPreview, setLogoPreview] = useState(null);
 
-  // Load brands from Supabase
+  // Load brands - try Supabase first, fallback to brands.json + localStorage
   useEffect(() => {
     const loadBrands = async () => {
       try {
         setLoading(true);
-        const data = await getBrands();
-        setBrands(data);
+        const data = await getBrands(); // This will fallback to brands.json if Supabase not configured
+        setBrands(data || []);
+        
+        // If using brands.json, also check localStorage for additional brands
+        if (data && data.length > 0) {
+          const storedBrands = localStorage.getItem('cryptoBrands');
+          if (storedBrands) {
+            try {
+              const localBrands = JSON.parse(storedBrands);
+              if (localBrands.length > data.length) {
+                // Merge: use data as base, add extras from localStorage
+                const dataIds = new Set(data.map(b => b.id));
+                const extraBrands = localBrands.filter(b => !dataIds.has(b.id));
+                setBrands([...data, ...extraBrands]);
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
       } catch (error) {
         console.error('Error loading brands:', error);
-        alert('Failed to load brands. Please check your Supabase configuration.');
-        setBrands([]);
+        // Fallback to brands.json + localStorage
+        const baseBrands = brandsData.brands || [];
+        const storedBrands = localStorage.getItem('cryptoBrands');
+        
+        if (storedBrands) {
+          try {
+            const localBrands = JSON.parse(storedBrands);
+            setBrands(localBrands.length > 0 ? localBrands : baseBrands);
+          } catch (e) {
+            setBrands(baseBrands);
+          }
+        } else {
+          setBrands(baseBrands);
+        }
       } finally {
         setLoading(false);
       }
@@ -40,10 +72,10 @@ const Admin = () => {
       setIsAuthenticated(true);
       loadBrands();
 
-      // Subscribe to real-time changes
+      // Subscribe to real-time changes (only if Supabase configured)
       const unsubscribe = subscribeToBrands((payload) => {
         console.log('Real-time update received:', payload);
-        loadBrands(); // Reload on any change
+        loadBrands();
       });
 
       return () => {
@@ -161,31 +193,85 @@ const Admin = () => {
     }
 
     try {
+      // Try Supabase first
       if (editingId) {
         // Update existing brand
-        await updateBrand(editingId, {
-          name: formData.name.trim(),
-          username: formData.username.trim(),
-          affiliateBadges: formData.affiliateBadges,
-          xProfileLink: formData.xProfileLink.trim() || null,
-          logoUrl: formData.logoUrl.trim() || null
-        });
-        alert('Brand updated successfully! Changes are visible to everyone immediately.');
+        try {
+          await updateBrand(editingId, {
+            name: formData.name.trim(),
+            username: formData.username.trim(),
+            affiliateBadges: formData.affiliateBadges,
+            xProfileLink: formData.xProfileLink.trim() || null,
+            logoUrl: formData.logoUrl.trim() || null
+          });
+          alert('Brand updated successfully! Changes are visible to everyone immediately.');
+          
+          // Reload brands
+          const updatedBrands = await getBrands();
+          setBrands(updatedBrands);
+        } catch (supabaseError) {
+          // Fallback to localStorage + GitHub sync
+          const updatedBrands = brands.map(brand => 
+            brand.id === editingId
+              ? {
+                  ...brand,
+                  name: formData.name.trim(),
+                  username: formData.username.trim(),
+                  affiliateBadges: parseInt(formData.affiliateBadges),
+                  xProfileLink: formData.xProfileLink.trim() || null,
+                  logoUrl: formData.logoUrl.trim() || null
+                }
+              : brand
+          );
+          setBrands(updatedBrands);
+          localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
+          
+          // Sync to GitHub
+          const syncResult = await syncBrandsToGitHub(updatedBrands, `Updated brand: ${formData.name.trim()}`);
+          if (syncResult.success) {
+            alert('Brand updated successfully! ' + syncResult.message);
+          } else {
+            alert('Brand updated locally, but failed to sync to GitHub: ' + syncResult.message);
+          }
+        }
       } else {
         // Add new brand
-        await addBrand({
-          name: formData.name.trim(),
-          username: formData.username.trim(),
-          affiliateBadges: formData.affiliateBadges,
-          xProfileLink: formData.xProfileLink.trim() || null,
-          logoUrl: formData.logoUrl.trim() || null
-        });
-        alert('Brand added successfully! Changes are visible to everyone immediately.');
+        try {
+          await addBrand({
+            name: formData.name.trim(),
+            username: formData.username.trim(),
+            affiliateBadges: formData.affiliateBadges,
+            xProfileLink: formData.xProfileLink.trim() || null,
+            logoUrl: formData.logoUrl.trim() || null
+          });
+          alert('Brand added successfully! Changes are visible to everyone immediately.');
+          
+          // Reload brands
+          const updatedBrands = await getBrands();
+          setBrands(updatedBrands);
+        } catch (supabaseError) {
+          // Fallback to localStorage + GitHub sync
+          const newBrand = {
+            id: Date.now(),
+            name: formData.name.trim(),
+            username: formData.username.trim(),
+            affiliateBadges: parseInt(formData.affiliateBadges),
+            xProfileLink: formData.xProfileLink.trim() || null,
+            logoUrl: formData.logoUrl.trim() || null
+          };
+          const updatedBrands = [...brands, newBrand];
+          setBrands(updatedBrands);
+          localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
+          
+          // Sync to GitHub
+          const syncResult = await syncBrandsToGitHub(updatedBrands, `Added brand: ${newBrand.name}`);
+          if (syncResult.success) {
+            alert('Brand added successfully! ' + syncResult.message);
+          } else {
+            alert('Brand added locally, but failed to sync to GitHub: ' + syncResult.message);
+          }
+        }
       }
-
-      // Reload brands from Supabase
-      const updatedBrands = await getBrands();
-      setBrands(updatedBrands);
 
       // Reset form
       setFormData({
@@ -240,12 +326,28 @@ const Admin = () => {
 
     if (window.confirm(`Are you sure you want to delete "${brandToDelete.name}"?`)) {
       try {
-        await deleteBrand(id);
-        alert('Brand deleted successfully! Changes are visible to everyone immediately.');
-        
-        // Reload brands from Supabase
-        const updatedBrands = await getBrands();
-        setBrands(updatedBrands);
+        // Try Supabase first
+        try {
+          await deleteBrand(id);
+          alert('Brand deleted successfully! Changes are visible to everyone immediately.');
+          
+          // Reload brands
+          const updatedBrands = await getBrands();
+          setBrands(updatedBrands);
+        } catch (supabaseError) {
+          // Fallback to localStorage + GitHub sync
+          const updatedBrands = brands.filter(brand => brand.id !== id);
+          setBrands(updatedBrands);
+          localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
+          
+          // Sync to GitHub
+          const syncResult = await syncBrandsToGitHub(updatedBrands, `Deleted brand: ${brandToDelete.name}`);
+          if (syncResult.success) {
+            alert('Brand deleted successfully! ' + syncResult.message);
+          } else {
+            alert('Brand deleted locally, but failed to sync to GitHub: ' + syncResult.message);
+          }
+        }
       } catch (error) {
         console.error('Error deleting brand:', error);
         alert(`Error: ${error.message || 'Failed to delete brand. Please try again.'}`);
