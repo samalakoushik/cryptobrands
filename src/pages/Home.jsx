@@ -14,37 +14,71 @@ const Home = () => {
   const [isFixed, setIsFixed] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  useEffect(() => {
+  // Function to load and merge brands from brands.json and localStorage
+  const loadBrands = () => {
+    const baseBrands = brandsData.brands || [];
     const storedBrands = localStorage.getItem('cryptoBrands');
+    
     if (storedBrands) {
-      setBrands(JSON.parse(storedBrands));
-    } else {
-      setBrands(brandsData.brands || []);
+      try {
+        const localBrands = JSON.parse(storedBrands);
+        // If localStorage has data, use it (it includes all brands including new ones added via admin)
+        // This ensures admin additions are immediately visible
+        if (localBrands.length > 0) {
+          setBrands(localBrands);
+          return;
+        }
+      } catch (error) {
+        console.error('Error parsing localStorage data:', error);
+      }
     }
+    
+    // Fallback to baseBrands if no localStorage data
+    setBrands(baseBrands);
+  };
+
+  // Initial load
+  useEffect(() => {
+    loadBrands();
   }, []);
 
+  // Listen for storage changes (cross-tab updates)
   useEffect(() => {
-    const handleStorageChange = () => {
-      const storedBrands = localStorage.getItem('cryptoBrands');
-      if (storedBrands) {
-        setBrands(JSON.parse(storedBrands));
+    const handleStorageChange = (e) => {
+      if (e.key === 'cryptoBrands') {
+        loadBrands();
       }
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Poll for localStorage changes (for same-tab updates)
+  // Poll for localStorage changes (same-tab updates - when admin adds/edits brands)
   useEffect(() => {
     const interval = setInterval(() => {
       const storedBrands = localStorage.getItem('cryptoBrands');
       if (storedBrands) {
-        const parsed = JSON.parse(storedBrands);
-        if (JSON.stringify(parsed) !== JSON.stringify(brands)) {
-          setBrands(parsed);
+        try {
+          const parsed = JSON.parse(storedBrands);
+          // Only update if data actually changed
+          const currentBrandsStr = JSON.stringify(brands);
+          const newBrandsStr = JSON.stringify(parsed);
+          if (currentBrandsStr !== newBrandsStr) {
+            setBrands(parsed);
+          }
+        } catch (error) {
+          // Ignore parse errors
+        }
+      } else {
+        // If localStorage was cleared, reload from base
+        const baseBrands = brandsData.brands || [];
+        const currentBrandsStr = JSON.stringify(brands);
+        const baseBrandsStr = JSON.stringify(baseBrands);
+        if (currentBrandsStr !== baseBrandsStr) {
+          setBrands(baseBrands);
         }
       }
-    }, 500);
+    }, 500); // Check every 500ms for updates
     return () => clearInterval(interval);
   }, [brands]);
 

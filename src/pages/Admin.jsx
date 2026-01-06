@@ -25,12 +25,29 @@ const Admin = () => {
       setIsAuthenticated(true);
     }
 
-    // Load brands
+    // Load brands - start with brands.json, then merge with localStorage
+    const baseBrands = brandsData.brands || [];
     const storedBrands = localStorage.getItem('cryptoBrands');
+    
     if (storedBrands) {
-      setBrands(JSON.parse(storedBrands));
+      try {
+        const localBrands = JSON.parse(storedBrands);
+        // Use localStorage if it has data (includes base brands + any additions)
+        if (localBrands.length > 0) {
+          setBrands(localBrands);
+        } else {
+          setBrands(baseBrands);
+        }
+      } catch (error) {
+        console.error('Error parsing localStorage:', error);
+        setBrands(baseBrands);
+      }
     } else {
-      setBrands(brandsData.brands || []);
+      // If no localStorage, initialize with baseBrands and save to localStorage
+      setBrands(baseBrands);
+      if (baseBrands.length > 0) {
+        localStorage.setItem('cryptoBrands', JSON.stringify(baseBrands));
+      }
     }
   }, []);
 
