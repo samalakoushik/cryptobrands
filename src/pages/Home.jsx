@@ -14,18 +14,25 @@ const Home = () => {
   const [isFixed, setIsFixed] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Function to load and merge brands from brands.json and localStorage
+  // Function to load brands - brands.json is the source of truth (deployed data)
   const loadBrands = () => {
+    // Always use brands.json as the primary source of truth
+    // This ensures all users see the same data that's deployed
     const baseBrands = brandsData.brands || [];
+    
+    // Only merge localStorage if it has additional brands (for local development)
+    // In production, brands.json should always be the authoritative source
     const storedBrands = localStorage.getItem('cryptoBrands');
     
     if (storedBrands) {
       try {
         const localBrands = JSON.parse(storedBrands);
-        // If localStorage has data, use it (it includes all brands including new ones added via admin)
-        // This ensures admin additions are immediately visible
-        if (localBrands.length > 0) {
-          setBrands(localBrands);
+        // Only merge if localStorage has more brands than brands.json
+        // This allows local testing while keeping brands.json as source of truth
+        if (localBrands.length > baseBrands.length) {
+          const baseIds = new Set(baseBrands.map(b => b.id));
+          const extraBrands = localBrands.filter(b => !baseIds.has(b.id));
+          setBrands([...baseBrands, ...extraBrands]);
           return;
         }
       } catch (error) {
@@ -33,7 +40,7 @@ const Home = () => {
       }
     }
     
-    // Fallback to baseBrands if no localStorage data
+    // Always default to brands.json (the deployed source of truth)
     setBrands(baseBrands);
   };
 
@@ -53,32 +60,21 @@ const Home = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Poll for localStorage changes (same-tab updates - when admin adds/edits brands)
+  // Poll for brands.json updates (when GitHub sync updates the deployed data)
+  // Note: In production, brands.json is updated via GitHub sync, then Vercel redeploys
+  // This polling ensures the page updates when new data is deployed
   useEffect(() => {
     const interval = setInterval(() => {
-      const storedBrands = localStorage.getItem('cryptoBrands');
-      if (storedBrands) {
-        try {
-          const parsed = JSON.parse(storedBrands);
-          // Only update if data actually changed
-          const currentBrandsStr = JSON.stringify(brands);
-          const newBrandsStr = JSON.stringify(parsed);
-          if (currentBrandsStr !== newBrandsStr) {
-            setBrands(parsed);
-          }
-        } catch (error) {
-          // Ignore parse errors
-        }
-      } else {
-        // If localStorage was cleared, reload from base
-        const baseBrands = brandsData.brands || [];
-        const currentBrandsStr = JSON.stringify(brands);
-        const baseBrandsStr = JSON.stringify(baseBrands);
-        if (currentBrandsStr !== baseBrandsStr) {
-          setBrands(baseBrands);
-        }
+      // Always check brands.json as the source of truth
+      const baseBrands = brandsData.brands || [];
+      const currentBrandsStr = JSON.stringify(brands);
+      const baseBrandsStr = JSON.stringify(baseBrands);
+      
+      // Update if brands.json has changed (after deployment)
+      if (currentBrandsStr !== baseBrandsStr) {
+        setBrands(baseBrands);
       }
-    }, 500); // Check every 500ms for updates
+    }, 2000); // Check every 2 seconds for updates (less frequent since it's deployment-based)
     return () => clearInterval(interval);
   }, [brands]);
 
