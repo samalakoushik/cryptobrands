@@ -79,6 +79,9 @@ const BrandModal = ({ brand, isOpen, onClose }) => {
             <span className="modal-detail-label">Total Spend:</span>
             <span className="modal-detail-value">${totalSpend.toLocaleString()}</span>
           </div>
+          <div className="modal-disclaimer">
+            sometimes the data may not be accurate
+          </div>
         </div>
       </div>
     </div>
