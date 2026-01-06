@@ -231,6 +231,22 @@
       "affiliateBadges": 10,
       "xProfileLink": "https://x.com/rollbit",
       "logoUrl": "https://pbs.twimg.com/profile_images/1891383082982297600/Lt9EzSQF_400x400.jpg"
+    },
+    {
+      "id": 1767700000001,
+      "name": "Monad",
+      "username": "@monad_xyz",
+      "affiliateBadges": 0,
+      "xProfileLink": "https://x.com/monad_xyz",
+      "logoUrl": null
+    },
+    {
+      "id": 1767700000002,
+      "name": "Polkadot",
+      "username": "@polkadot",
+      "affiliateBadges": 0,
+      "xProfileLink": "https://x.com/polkadot",
+      "logoUrl": null
     }
   ]
 }
