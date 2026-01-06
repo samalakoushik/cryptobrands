@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import brandsData from '../data/brands.json';
 import AdminLogin from '../components/AdminLogin';
 import { exportLocalStorageData } from '../utils/dataMigration';
+import { syncBrandsToGitHub } from '../utils/githubSync';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -151,7 +152,7 @@ const Admin = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.name || !formData.username || formData.affiliateBadges === '') {
@@ -159,9 +160,12 @@ const Admin = () => {
       return;
     }
 
+    let updatedBrands;
+    let action;
+
     if (editingId) {
       // Update existing brand
-      const updatedBrands = brands.map(brand => 
+      updatedBrands = brands.map(brand => 
         brand.id === editingId
           ? {
               ...brand,
@@ -173,10 +177,7 @@ const Admin = () => {
             }
           : brand
       );
-      setBrands(updatedBrands);
-      localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
-      alert('Brand updated successfully!');
-      setEditingId(null);
+      action = `Updated brand: ${formData.name.trim()}`;
     } else {
       // Add new brand
       const newBrand = {
@@ -188,10 +189,26 @@ const Admin = () => {
         logoUrl: formData.logoUrl.trim() || null
       };
 
-      const updatedBrands = [...brands, newBrand];
-      setBrands(updatedBrands);
-      localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
-      alert('Brand added successfully!');
+      updatedBrands = [...brands, newBrand];
+      action = `Added brand: ${formData.name.trim()}`;
+    }
+
+    // Update local state and localStorage immediately for instant feedback
+    setBrands(updatedBrands);
+    localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
+
+    // Sync to GitHub (this will commit to GitHub and trigger Vercel deployment)
+    const syncResult = await syncBrandsToGitHub(updatedBrands, action);
+    
+    if (syncResult.success) {
+      alert(`${editingId ? 'Brand updated' : 'Brand added'} successfully! ${syncResult.message}`);
+    } else {
+      // Still show success for local update, but warn about GitHub sync
+      alert(`${editingId ? 'Brand updated' : 'Brand added'} locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+    }
+
+    if (editingId) {
+      setEditingId(null);
     }
     
     setFormData({
@@ -234,11 +251,26 @@ const Admin = () => {
     setLogoPreview(null);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this brand?')) {
+  const handleDelete = async (id) => {
+    const brandToDelete = brands.find(brand => brand.id === id);
+    if (!brandToDelete) return;
+
+    if (window.confirm(`Are you sure you want to delete "${brandToDelete.name}"?`)) {
       const updatedBrands = brands.filter(brand => brand.id !== id);
+      
+      // Update local state and localStorage immediately
       setBrands(updatedBrands);
       localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
+
+      // Sync to GitHub
+      const action = `Deleted brand: ${brandToDelete.name}`;
+      const syncResult = await syncBrandsToGitHub(updatedBrands, action);
+      
+      if (syncResult.success) {
+        alert(`Brand deleted successfully! ${syncResult.message}`);
+      } else {
+        alert(`Brand deleted locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+      }
     }
   };
 
