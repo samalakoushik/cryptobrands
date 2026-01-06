@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extract Brand Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            font-family: monospace;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+        .error {
+            color: #f44336;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Extract Brand Data from LocalStorage</h1>
+        <p>This tool extracts brand data from your browser's localStorage and formats it for <code>brands.json</code></p>
+        
+        <button onclick="extractData()">Extract Data</button>
+        <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <button onclick="downloadFile()">Download JSON File</button>
+        
+        <div id="message"></div>
+        
+        <textarea id="output" placeholder="Extracted data will appear here..."></textarea>
+        
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Click "Extract Data" to load your localStorage data</li>
+            <li>Click "Copy to Clipboard" or "Download JSON File"</li>
+            <li>Paste the content into <code>src/data/brands.json</code> in your project</li>
+            <li>Commit and push to GitHub</li>
+        </ol>
+    </div>
+
+    <script>
+        let extractedData = null;
+
+        function extractData() {
+            const storedBrands = localStorage.getItem('cryptoBrands');
+            const messageDiv = document.getElementById('message');
+            const output = document.getElementById('output');
+            
+            if (!storedBrands) {
+                messageDiv.innerHTML = '<div class="error">No brand data found in localStorage. Make sure you\'ve added brands on localhost first.</div>';
+                output.value = '';
+                return;
+            }
+            
+            try {
+                const brands = JSON.parse(storedBrands);
+                extractedData = JSON.stringify({ brands }, null, 2);
+                output.value = extractedData;
+                messageDiv.innerHTML = `<div class="success">✅ Extracted ${brands.length} brand(s) successfully!</div>`;
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">Error parsing data: ${error.message}</div>`;
+                output.value = '';
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            if (!output.value) {
+                alert('Please extract data first!');
+                return;
+            }
+            output.select();
+            document.execCommand('copy');
+            document.getElementById('message').innerHTML = '<div class="success">✅ Copied to clipboard! Now paste it into src/data/brands.json</div>';
+        }
+
+        function downloadFile() {
+            if (!extractedData) {
+                alert('Please extract data first!');
+                return;
+            }
+            
+            const blob = new Blob([extractedData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'brands.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            document.getElementById('message').innerHTML = '<div class="success">✅ File downloaded! Replace src/data/brands.json with this file.</div>';
+        }
+
+        // Auto-extract on load
+        window.onload = extractData;
+    </script>
+</body>
+</html>
+
+

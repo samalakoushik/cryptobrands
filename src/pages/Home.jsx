@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import SearchBar from '../components/SearchBar';
 import BrandCard from '../components/BrandCard';
 import BrandModal from '../components/BrandModal';
-import brandsData from '../data/brands.json';
+import { getBrands, subscribeToBrands } from '../utils/brandsService';
 
 const Home = () => {
   const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('spend-high');
   const [showAll, setShowAll] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null);
@@ -14,69 +15,33 @@ const Home = () => {
   const [isFixed, setIsFixed] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Function to load brands - brands.json is the source of truth (deployed data)
-  const loadBrands = () => {
-    // Always use brands.json as the primary source of truth
-    // This ensures all users see the same data that's deployed
-    const baseBrands = brandsData.brands || [];
-    
-    // Only merge localStorage if it has additional brands (for local development)
-    // In production, brands.json should always be the authoritative source
-    const storedBrands = localStorage.getItem('cryptoBrands');
-    
-    if (storedBrands) {
+  // Load brands from Supabase
+  useEffect(() => {
+    const loadBrands = async () => {
       try {
-        const localBrands = JSON.parse(storedBrands);
-        // Only merge if localStorage has more brands than brands.json
-        // This allows local testing while keeping brands.json as source of truth
-        if (localBrands.length > baseBrands.length) {
-          const baseIds = new Set(baseBrands.map(b => b.id));
-          const extraBrands = localBrands.filter(b => !baseIds.has(b.id));
-          setBrands([...baseBrands, ...extraBrands]);
-          return;
-        }
+        setLoading(true);
+        const data = await getBrands();
+        setBrands(data);
       } catch (error) {
-        console.error('Error parsing localStorage data:', error);
-      }
-    }
-    
-    // Always default to brands.json (the deployed source of truth)
-    setBrands(baseBrands);
-  };
-
-  // Initial load
-  useEffect(() => {
-    loadBrands();
-  }, []);
-
-  // Listen for storage changes (cross-tab updates)
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'cryptoBrands') {
-        loadBrands();
+        console.error('Error loading brands:', error);
+        setBrands([]); // Fallback to empty array
+      } finally {
+        setLoading(false);
       }
     };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
 
-  // Poll for brands.json updates (when GitHub sync updates the deployed data)
-  // Note: In production, brands.json is updated via GitHub sync, then Vercel redeploys
-  // This polling ensures the page updates when new data is deployed
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Always check brands.json as the source of truth
-      const baseBrands = brandsData.brands || [];
-      const currentBrandsStr = JSON.stringify(brands);
-      const baseBrandsStr = JSON.stringify(baseBrands);
-      
-      // Update if brands.json has changed (after deployment)
-      if (currentBrandsStr !== baseBrandsStr) {
-        setBrands(baseBrands);
-      }
-    }, 2000); // Check every 2 seconds for updates (less frequent since it's deployment-based)
-    return () => clearInterval(interval);
-  }, [brands]);
+    loadBrands();
+
+    // Subscribe to real-time updates
+    const unsubscribe = subscribeToBrands((payload) => {
+      console.log('Real-time update received:', payload);
+      loadBrands(); // Reload on changes
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
 
   // Scroll detection for button text and fixed header
@@ -168,7 +133,11 @@ const Home = () => {
         </div>
       </div>
 
-      {sortedBrands.length === 0 ? (
+      {loading ? (
+        <div className="empty-state">
+          Loading brands...
+        </div>
+      ) : sortedBrands.length === 0 ? (
         <div className="empty-state">
           No brands added yet.
         </div>

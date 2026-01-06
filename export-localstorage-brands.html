@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Export LocalStorage Brands</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            font-family: monospace;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .info {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Export LocalStorage Brands</h1>
+        <div class="info">
+            <p>This will extract all brands from your browser's localStorage and display them as JSON.</p>
+            <p>Click the button below, then copy the JSON and provide it to update brands.json on GitHub.</p>
+        </div>
+        <button onclick="exportBrands()">Export Brands from LocalStorage</button>
+        <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        <textarea id="output" readonly placeholder="Brands JSON will appear here..."></textarea>
+    </div>
+
+    <script>
+        function exportBrands() {
+            try {
+                const storedBrands = localStorage.getItem('cryptoBrands');
+                if (!storedBrands) {
+                    document.getElementById('output').value = 'No brands found in localStorage.';
+                    return;
+                }
+
+                const brands = JSON.parse(storedBrands);
+                const formatted = JSON.stringify({ brands }, null, 2);
+                document.getElementById('output').value = formatted;
+                
+                // Also log to console
+                console.log('Brands exported:', brands.length, 'brands');
+            } catch (error) {
+                document.getElementById('output').value = 'Error: ' + error.message;
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output');
+            output.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+
+        // Auto-export on load
+        window.onload = function() {
+            exportBrands();
+        };
+    </script>
+</body>
+</html>
+

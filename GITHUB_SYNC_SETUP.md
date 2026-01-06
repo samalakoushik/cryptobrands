@@ -105,3 +105,4 @@ If you prefer not to use GitHub API, you can:
 
 However, the automatic sync is recommended for real-time updates across all browsers.
 
+

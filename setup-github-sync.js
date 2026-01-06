@@ -88,3 +88,4 @@ if (args.includes('--token') && args.length > 1) {
   console.log('   After you paste the token, the script will continue.\n');
 }
 
+

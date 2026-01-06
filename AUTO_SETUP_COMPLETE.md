@@ -46,3 +46,4 @@ Once you've added the token to Vercel and redeployed:
 
 Everything is ready! Just add the GitHub token to Vercel and you're done! 🎉
 
+

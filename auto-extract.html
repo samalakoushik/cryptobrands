@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extract Brand Data</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a1a; color: #fff; }
+        button { background: #4CAF50; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 0; }
+        button:hover { background: #45a049; }
+        .success { color: #4CAF50; margin: 10px 0; }
+        .error { color: #f44336; margin: 10px 0; }
+        pre { background: #2a2a2a; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Extract Brand Data from LocalStorage</h1>
+    <p>This page will extract your brand data and save it automatically.</p>
+    <button onclick="extractAndSave()">Extract & Save Data</button>
+    <div id="message"></div>
+    <pre id="output"></pre>
+    
+    <script>
+        function extractAndSave() {
+            const storedBrands = localStorage.getItem('cryptoBrands');
+            const messageDiv = document.getElementById('message');
+            const output = document.getElementById('output');
+            
+            if (!storedBrands) {
+                messageDiv.innerHTML = '<div class="error">❌ No brand data found in localStorage. Make sure you've added brands on localhost first.</div>';
+                return;
+            }
+            
+            try {
+                const brands = JSON.parse(storedBrands);
+                const jsonData = JSON.stringify({ brands }, null, 2);
+                
+                output.textContent = jsonData;
+                messageDiv.innerHTML = '<div class="success">✅ Found ' + brands.length + ' brand(s)!</div>';
+                
+                // Save to file using File System Access API (if supported) or download
+                if ('showSaveFilePicker' in window) {
+                    window.showSaveFilePicker({
+                        suggestedName: 'brands.json',
+                        types: [{
+                            description: 'JSON file',
+                            accept: { 'application/json': ['.json'] }
+                        }]
+                    }).then(fileHandle => {
+                        return fileHandle.createWritable();
+                    }).then(writable => {
+                        return writable.write(jsonData);
+                    }).then(() => {
+                        messageDiv.innerHTML += '<div class="success">✅ File saved! Now update src/data/brands.json with this content.</div>';
+                    }).catch(err => {
+                        console.error('Error saving file:', err);
+                        downloadFile(jsonData);
+                    });
+                } else {
+                    downloadFile(jsonData);
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+        
+        function downloadFile(data) {
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'brands.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            document.getElementById('message').innerHTML += '<div class="success">✅ File downloaded! Replace src/data/brands.json with this file.</div>';
+        }
+        
+        // Auto-extract on load
+        window.onload = function() {
+            setTimeout(extractAndSave, 500);
+        };
+    </script>
+</body>
+</html>

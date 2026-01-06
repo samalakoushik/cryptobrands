@@ -96,3 +96,5 @@ Brand data added locally is stored in browser localStorage, which doesn't transf
 - **Required Fields:** `name`, `username`, `affiliateBadges`
 - **Optional Fields:** `xProfileLink`, `logoUrl`
 
+
+

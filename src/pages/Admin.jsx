@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import brandsData from '../data/brands.json';
 import AdminLogin from '../components/AdminLogin';
-import { exportLocalStorageData } from '../utils/dataMigration';
-import { syncBrandsToGitHub } from '../utils/githubSync';
+import { getBrands, addBrand, updateBrand, deleteBrand, subscribeToBrands } from '../utils/brandsService';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,38 +18,39 @@ const Admin = () => {
   });
   const [logoPreview, setLogoPreview] = useState(null);
 
+  // Load brands from Supabase
   useEffect(() => {
+    const loadBrands = async () => {
+      try {
+        setLoading(true);
+        const data = await getBrands();
+        setBrands(data);
+      } catch (error) {
+        console.error('Error loading brands:', error);
+        alert('Failed to load brands. Please check your Supabase configuration.');
+        setBrands([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     // Check if already authenticated
     const authStatus = localStorage.getItem('adminAuthenticated');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
-    }
+      loadBrands();
 
-    // Load brands - start with brands.json, then merge with localStorage
-    const baseBrands = brandsData.brands || [];
-    const storedBrands = localStorage.getItem('cryptoBrands');
-    
-    if (storedBrands) {
-      try {
-        const localBrands = JSON.parse(storedBrands);
-        // Use localStorage if it has data (includes base brands + any additions)
-        if (localBrands.length > 0) {
-          setBrands(localBrands);
-        } else {
-          setBrands(baseBrands);
-        }
-      } catch (error) {
-        console.error('Error parsing localStorage:', error);
-        setBrands(baseBrands);
-      }
-    } else {
-      // If no localStorage, initialize with baseBrands and save to localStorage
-      setBrands(baseBrands);
-      if (baseBrands.length > 0) {
-        localStorage.setItem('cryptoBrands', JSON.stringify(baseBrands));
-      }
+      // Subscribe to real-time changes
+      const unsubscribe = subscribeToBrands((payload) => {
+        console.log('Real-time update received:', payload);
+        loadBrands(); // Reload on any change
+      });
+
+      return () => {
+        unsubscribe();
+      };
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const handleLogin = (status) => {
     setIsAuthenticated(status);
@@ -160,74 +160,47 @@ const Admin = () => {
       return;
     }
 
-    let updatedBrands;
-    let action;
-
-    if (editingId) {
-      // Update existing brand
-      updatedBrands = brands.map(brand => 
-        brand.id === editingId
-          ? {
-              ...brand,
-              name: formData.name.trim(),
-              username: formData.username.trim(),
-              affiliateBadges: parseInt(formData.affiliateBadges),
-              xProfileLink: formData.xProfileLink.trim() || null,
-              logoUrl: formData.logoUrl.trim() || null
-            }
-          : brand
-      );
-      action = `Updated brand: ${formData.name.trim()}`;
-    } else {
-      // Add new brand
-      const newBrand = {
-        id: Date.now(),
-        name: formData.name.trim(),
-        username: formData.username.trim(),
-        affiliateBadges: parseInt(formData.affiliateBadges),
-        xProfileLink: formData.xProfileLink.trim() || null,
-        logoUrl: formData.logoUrl.trim() || null
-      };
-
-      updatedBrands = [...brands, newBrand];
-      action = `Added brand: ${formData.name.trim()}`;
-    }
-
-    // Update local state and localStorage immediately for instant feedback
-    setBrands(updatedBrands);
-    localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
-
-    // Sync to GitHub (this will commit to GitHub and trigger Vercel deployment)
-    const syncResult = await syncBrandsToGitHub(updatedBrands, action);
-    
-    if (syncResult.success) {
-      alert(`${editingId ? 'Brand updated' : 'Brand added'} successfully! ${syncResult.message}`);
-    } else {
-      // Check if it's a token setup issue
-      if (syncResult.message === 'GITHUB_TOKEN_NOT_SET') {
-        const setupMessage = `${editingId ? 'Brand updated' : 'Brand added'} locally, but GitHub sync is not configured.\n\n` +
-          `To enable global sync:\n` +
-          `1. Run: node automate-full-setup.js\n` +
-          `2. Or manually add GITHUB_TOKEN to Vercel\n` +
-          `3. See SETUP_STEPS.md for details\n\n` +
-          `Changes are saved in this browser only until token is set up.`;
-        alert(setupMessage);
+    try {
+      if (editingId) {
+        // Update existing brand
+        await updateBrand(editingId, {
+          name: formData.name.trim(),
+          username: formData.username.trim(),
+          affiliateBadges: formData.affiliateBadges,
+          xProfileLink: formData.xProfileLink.trim() || null,
+          logoUrl: formData.logoUrl.trim() || null
+        });
+        alert('Brand updated successfully! Changes are visible to everyone immediately.');
       } else {
-        alert(`${editingId ? 'Brand updated' : 'Brand added'} locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+        // Add new brand
+        await addBrand({
+          name: formData.name.trim(),
+          username: formData.username.trim(),
+          affiliateBadges: formData.affiliateBadges,
+          xProfileLink: formData.xProfileLink.trim() || null,
+          logoUrl: formData.logoUrl.trim() || null
+        });
+        alert('Brand added successfully! Changes are visible to everyone immediately.');
       }
-    }
 
-    if (editingId) {
+      // Reload brands from Supabase
+      const updatedBrands = await getBrands();
+      setBrands(updatedBrands);
+
+      // Reset form
+      setFormData({
+        name: '',
+        username: '',
+        affiliateBadges: '',
+        xProfileLink: '',
+        logoUrl: ''
+      });
       setEditingId(null);
+      setLogoPreview(null);
+    } catch (error) {
+      console.error('Error saving brand:', error);
+      alert(`Error: ${error.message || 'Failed to save brand. Please try again.'}`);
     }
-    
-    setFormData({
-      name: '',
-      username: '',
-      affiliateBadges: '',
-      xProfileLink: '',
-      logoUrl: ''
-    });
   };
 
   const handleEdit = (brand) => {
@@ -266,31 +239,16 @@ const Admin = () => {
     if (!brandToDelete) return;
 
     if (window.confirm(`Are you sure you want to delete "${brandToDelete.name}"?`)) {
-      const updatedBrands = brands.filter(brand => brand.id !== id);
-      
-      // Update local state and localStorage immediately
-      setBrands(updatedBrands);
-      localStorage.setItem('cryptoBrands', JSON.stringify(updatedBrands));
-
-      // Sync to GitHub
-      const action = `Deleted brand: ${brandToDelete.name}`;
-      const syncResult = await syncBrandsToGitHub(updatedBrands, action);
-      
-      if (syncResult.success) {
-        alert(`Brand deleted successfully! ${syncResult.message}`);
-      } else {
-        // Check if it's a token setup issue
-        if (syncResult.message === 'GITHUB_TOKEN_NOT_SET') {
-          const setupMessage = `Brand deleted locally, but GitHub sync is not configured.\n\n` +
-            `To enable global sync:\n` +
-            `1. Run: node automate-full-setup.js\n` +
-            `2. Or manually add GITHUB_TOKEN to Vercel\n` +
-            `3. See SETUP_STEPS.md for details\n\n` +
-            `Changes are saved in this browser only until token is set up.`;
-          alert(setupMessage);
-        } else {
-          alert(`Brand deleted locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
-        }
+      try {
+        await deleteBrand(id);
+        alert('Brand deleted successfully! Changes are visible to everyone immediately.');
+        
+        // Reload brands from Supabase
+        const updatedBrands = await getBrands();
+        setBrands(updatedBrands);
+      } catch (error) {
+        console.error('Error deleting brand:', error);
+        alert(`Error: ${error.message || 'Failed to delete brand. Please try again.'}`);
       }
     }
   };
@@ -315,20 +273,7 @@ const Admin = () => {
           <h1 className="admin-title">Admin Dashboard</h1>
         </div>
         <div className="admin-header-right">
-          <button 
-            className="export-button" 
-            onClick={() => {
-              const exported = exportLocalStorageData();
-              if (exported) {
-                alert(`Exported ${exported.length} brand(s)! Check your downloads folder for brands-data.json`);
-              } else {
-                alert('No data to export. Add brands first.');
-              }
-            }}
-            title="Export brand data to JSON file"
-          >
-            Export Data
-          </button>
+          {loading && <span style={{ marginRight: '10px', color: '#888' }}>Loading...</span>}
           <button className="logout-button" onClick={handleLogout}>
             Logout
           </button>
