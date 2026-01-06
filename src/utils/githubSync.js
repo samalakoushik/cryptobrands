@@ -15,6 +15,10 @@ export const syncBrandsToGitHub = async (brands, action = '') => {
     const data = await response.json();
 
     if (!response.ok) {
+      // Check if it's a token configuration error
+      if (data.error && data.error.includes('GitHub token not configured')) {
+        throw new Error('GITHUB_TOKEN_NOT_SET');
+      }
       throw new Error(data.message || data.error || 'Failed to sync to GitHub');
     }
 
@@ -30,4 +34,5 @@ export const syncBrandsToGitHub = async (brands, action = '') => {
     };
   }
 };
+
 

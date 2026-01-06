@@ -203,8 +203,18 @@ const Admin = () => {
     if (syncResult.success) {
       alert(`${editingId ? 'Brand updated' : 'Brand added'} successfully! ${syncResult.message}`);
     } else {
-      // Still show success for local update, but warn about GitHub sync
-      alert(`${editingId ? 'Brand updated' : 'Brand added'} locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+      // Check if it's a token setup issue
+      if (syncResult.message === 'GITHUB_TOKEN_NOT_SET') {
+        const setupMessage = `${editingId ? 'Brand updated' : 'Brand added'} locally, but GitHub sync is not configured.\n\n` +
+          `To enable global sync:\n` +
+          `1. Run: node automate-full-setup.js\n` +
+          `2. Or manually add GITHUB_TOKEN to Vercel\n` +
+          `3. See SETUP_STEPS.md for details\n\n` +
+          `Changes are saved in this browser only until token is set up.`;
+        alert(setupMessage);
+      } else {
+        alert(`${editingId ? 'Brand updated' : 'Brand added'} locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+      }
     }
 
     if (editingId) {
@@ -269,7 +279,18 @@ const Admin = () => {
       if (syncResult.success) {
         alert(`Brand deleted successfully! ${syncResult.message}`);
       } else {
-        alert(`Brand deleted locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+        // Check if it's a token setup issue
+        if (syncResult.message === 'GITHUB_TOKEN_NOT_SET') {
+          const setupMessage = `Brand deleted locally, but GitHub sync is not configured.\n\n` +
+            `To enable global sync:\n` +
+            `1. Run: node automate-full-setup.js\n` +
+            `2. Or manually add GITHUB_TOKEN to Vercel\n` +
+            `3. See SETUP_STEPS.md for details\n\n` +
+            `Changes are saved in this browser only until token is set up.`;
+          alert(setupMessage);
+        } else {
+          alert(`Brand deleted locally, but failed to sync to GitHub: ${syncResult.message}\n\nChanges are saved in this browser only.`);
+        }
       }
     }
   };
