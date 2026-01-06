@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Sync Setup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .step h2 {
+            display: inline;
+            color: #333;
+        }
+        .step-content {
+            margin-top: 15px;
+            line-height: 1.8;
+        }
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #5568d3;
+        }
+        .button-secondary {
+            background: #6c757d;
+        }
+        .button-secondary:hover {
+            background: #5a6268;
+        }
+        .token-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .token-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 GitHub Sync Setup</h1>
+        <p class="subtitle">Automated setup for cross-browser brand updates</p>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <h2>Create GitHub Token</h2>
+            <div class="step-content">
+                <p>Click the button below to open GitHub token creation page with pre-filled settings:</p>
+                <a href="https://github.com/settings/tokens/new?scopes=repo&description=Vercel%20Brands%20Sync" target="_blank" class="button">
+                    Create GitHub Token
+                </a>
+                <p style="margin-top: 15px;">
+                    <strong>On the GitHub page:</strong><br>
+                    • Token name: "Vercel Brands Sync" (already filled)<br>
+                    • Expiration: Choose "No expiration" or your preference<br>
+                    • Scopes: "repo" should be checked (already selected)<br>
+                    • Click <strong>"Generate token"</strong><br>
+                    • <strong>⚠️ COPY THE TOKEN</strong> (starts with <span class="code">ghp_</span>) - you won't see it again!
+                </p>
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <h2>Paste Token Here</h2>
+            <div class="step-content">
+                <input type="text" id="tokenInput" class="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+                <button onclick="saveToken()" class="button">Save Token & Continue</button>
+                <div id="tokenError" class="warning hidden" style="margin-top: 10px;">
+                    Invalid token format. Token should start with "ghp_"
+                </div>
+            </div>
+        </div>
+
+        <div id="step3" class="step hidden">
+            <span class="step-number">3</span>
+            <h2>Add Token to Vercel</h2>
+            <div class="step-content">
+                <p>Click the button below to open Vercel dashboard:</p>
+                <a href="https://vercel.com/dashboard" target="_blank" class="button">
+                    Open Vercel Dashboard
+                </a>
+                <p style="margin-top: 15px;">
+                    <strong>In Vercel dashboard:</strong><br>
+                    1. Find your <strong>"cryptobrands"</strong> project and click on it<br>
+                    2. Go to <strong>Settings</strong> → <strong>Environment Variables</strong><br>
+                    3. Click <strong>"Add New"</strong><br>
+                    4. Enter:<br>
+                       &nbsp;&nbsp;• <strong>Key:</strong> <span class="code">GITHUB_TOKEN</span><br>
+                       &nbsp;&nbsp;• <strong>Value:</strong> <span class="code" id="tokenDisplay"></span><br>
+                       &nbsp;&nbsp;• <strong>Environment:</strong> Select all (Production, Preview, Development)<br>
+                    5. Click <strong>"Save"</strong><br>
+                    6. Go to <strong>Deployments</strong> tab<br>
+                    7. Click <strong>"..."</strong> on the latest deployment → <strong>"Redeploy"</strong>
+                </p>
+            </div>
+        </div>
+
+        <div id="step4" class="step hidden">
+            <span class="step-number">4</span>
+            <h2>Test the Integration</h2>
+            <div class="step-content">
+                <p>After redeploying, test the integration:</p>
+                <a href="https://cryptobrands.vercel.app/admin" target="_blank" class="button">
+                    Go to Admin Dashboard
+                </a>
+                <p style="margin-top: 15px;">
+                    • Login with: <span class="code">admin</span> / <span class="code">200345i</span><br>
+                    • Add a test brand<br>
+                    • You should see: "Successfully synced to GitHub. Vercel will auto-deploy in 1-2 minutes."
+                </p>
+            </div>
+        </div>
+
+        <div id="successMessage" class="success hidden">
+            <strong>✅ Setup Complete!</strong><br>
+            Your token has been saved locally. After adding it to Vercel and redeploying, 
+            all admin changes will automatically sync to GitHub and deploy to all browsers!
+        </div>
+    </div>
+
+    <script>
+        function saveToken() {
+            const tokenInput = document.getElementById('tokenInput');
+            const token = tokenInput.value.trim();
+            const tokenError = document.getElementById('tokenError');
+            const step3 = document.getElementById('step3');
+            const step4 = document.getElementById('step4');
+            const successMessage = document.getElementById('successMessage');
+            const tokenDisplay = document.getElementById('tokenDisplay');
+
+            if (!token.startsWith('ghp_')) {
+                tokenError.classList.remove('hidden');
+                return;
+            }
+
+            tokenError.classList.add('hidden');
+            
+            // Save token to localStorage (for reference, not for the API)
+            localStorage.setItem('github_token_setup', token);
+            
+            // Show next steps
+            tokenDisplay.textContent = token.substring(0, 20) + '...';
+            step3.classList.remove('hidden');
+            step4.classList.remove('hidden');
+            successMessage.classList.remove('hidden');
+            
+            // Scroll to step 3
+            step3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Check if token already saved
+        const savedToken = localStorage.getItem('github_token_setup');
+        if (savedToken) {
+            document.getElementById('tokenInput').value = savedToken;
+            document.getElementById('tokenDisplay').textContent = savedToken.substring(0, 20) + '...';
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('step4').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
+
