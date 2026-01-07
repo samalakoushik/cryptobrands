@@ -28,7 +28,7 @@
       "id": 1767466213210,
       "name": "Base",
       "username": "@base",
-      "affiliateBadges": 76,
+      "affiliateBadges": 67,
       "xProfileLink": "https://x.com/base",
       "logoUrl": "https://pbs.twimg.com/profile_images/1945608199500910592/rnk6ixxH_400x400.jpg"
     },
@@ -233,100 +233,28 @@
       "logoUrl": "https://pbs.twimg.com/profile_images/1891383082982297600/Lt9EzSQF_400x400.jpg"
     },
     {
-      "id": 1767700000001,
-      "name": "Monad",
-      "username": "@monad",
-      "affiliateBadges": 69,
-      "xProfileLink": "https://x.com/monad",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1967693862559698944/XTfCXXGa_400x400.jpg"
+      "id": 1767600000001,
+      "name": "PolymarketTrade",
+      "username": "@PolymarketTrade",
+      "affiliateBadges": 121,
+      "xProfileLink": "https://x.com/PolymarketTrade",
+      "logoUrl": "https://pbs.twimg.com/profile_images/1984009470628761600/g0ajJ_4j_400x400.jpg"
     },
     {
-      "id": 1767700000002,
-      "name": "Polkadot",
-      "username": "@Polkadot",
-      "affiliateBadges": 26,
-      "xProfileLink": "https://x.com/Polkadot",
-      "logoUrl": "https://pbs.twimg.com/profile_images/2000932518304858116/uy8t5CnH_400x400.jpg"
+      "id": 1767600000002,
+      "name": "Polymarket Sport",
+      "username": "@PolymarketSport",
+      "affiliateBadges": 243,
+      "xProfileLink": "https://x.com/PolymarketSport",
+      "logoUrl": "https://pbs.twimg.com/profile_images/1994986527341113344/C5zm2IxC_400x400.jpg"
     },
     {
-      "id": 1767700000003,
-      "name": "Cookie3 🍪",
-      "username": "@Cookie3",
-      "affiliateBadges": 13,
-      "xProfileLink": "https://x.com/cookie3",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1945137732503908352/_ORUje17_400x400.jpg"
-    },
-    {
-      "id": 1767700000004,
-      "name": "Aave",
-      "username": "@aave",
-      "affiliateBadges": 25,
-      "xProfileLink": "https://x.com/aave",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1808921860781821952/CmtvkzWo_400x400.png"
-    },
-    {
-      "id": 1767700000005,
-      "name": "Morpho",
-      "username": "@Morpho",
-      "affiliateBadges": 4,
-      "xProfileLink": "https://x.com/Morpho",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1930600293915410432/dgTU7UNU_400x400.jpg"
-    },
-    {
-      "id": 1767700000006,
-      "name": "Ethena Labs",
-      "username": "@ethena_labs",
-      "affiliateBadges": 9,
-      "xProfileLink": "https://x.com/ethena_labs",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1963578749170900992/9M1Oxp04_400x400.jpg"
-    },
-    {
-      "id": 1767700000007,
-      "name": "Uniswap Labs 🦄",
-      "username": "@Uniswap",
-      "affiliateBadges": 17,
-      "xProfileLink": "https://x.com/Uniswap",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1831348758753206272/y2Z0hMrl_400x400.jpg"
-    },
-    {
-      "id": 1767700000008,
-      "name": "Jupiter",
-      "username": "@JupiterExchange",
-      "affiliateBadges": 45,
-      "xProfileLink": "https://x.com/JupiterExchange",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1944921381168099328/mVkHxhxy_400x400.jpg"
-    },
-    {
-      "id": 1767700000009,
-      "name": "Kamino",
-      "username": "@kamino",
-      "affiliateBadges": 13,
-      "xProfileLink": "https://x.com/kamino",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1999411256155938818/lAOSJHuf_400x400.jpg"
-    },
-    {
-      "id": 1767700000010,
-      "name": "PancakeSwap",
-      "username": "@PancakeSwap",
-      "affiliateBadges": 7,
-      "xProfileLink": "https://x.com/PancakeSwap",
-      "logoUrl": "https://pbs.twimg.com/profile_images/2004910939959967744/wr7-zpVh_400x400.jpg"
-    },
-    {
-      "id": 1767700000011,
-      "name": "Stargate",
-      "username": "@StargateFinance",
-      "affiliateBadges": 3,
-      "xProfileLink": "https://x.com/StargateFinance",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1928147506699145217/n7-KQGNJ_400x400.png"
-    },
-    {
-      "id": 1767700000012,
-      "name": "LayerZero",
-      "username": "@LayerZero_Core",
-      "affiliateBadges": 10,
-      "xProfileLink": "https://x.com/LayerZero_Core",
-      "logoUrl": "https://pbs.twimg.com/profile_images/1779646801605242880/FrFssPAQ_400x400.jpg"
+      "id": 1767600000003,
+      "name": "Polymarket Builders",
+      "username": "@PolymarketBuild",
+      "affiliateBadges": 87,
+      "xProfileLink": "https://x.com/PolymarketBuild",
+      "logoUrl": "https://pbs.twimg.com/profile_images/1965853271509073922/N4JUepCQ_400x400.jpg"
     }
   ]
 }
