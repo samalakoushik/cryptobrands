@@ -224,6 +224,8 @@ body {
 
 .brand-card-content {
   flex: 1;
+  padding-right: 80px;
+  min-width: 0;
 }
 
 .brand-logo-container {
@@ -257,6 +259,9 @@ body {
   font-size: 20px;
   margin-bottom: 8px;
   color: #ffffff;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .brand-username {
@@ -427,7 +432,6 @@ body {
   padding: 16px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
   align-items: center;
 }
 
@@ -437,7 +441,6 @@ body {
 
 .modal-detail-label {
   font-weight: 400;
-  font-family: 'Montserrat', sans-serif;
   color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
   display: flex;
@@ -446,10 +449,9 @@ body {
 }
 
 .modal-detail-value {
-  font-weight: 400;
+  font-weight: 700;
   color: #ffffff;
   font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
 }
 
 .modal-total-row {
@@ -460,26 +462,11 @@ body {
 
 .modal-total-row .modal-detail-label {
   font-size: 16px;
-  font-weight: 400;
-  font-family: 'Montserrat', sans-serif;
 }
 
 .modal-total-row .modal-detail-value {
-  font-size: 22px;
+  font-size: 20px;
   color: #1da1f2;
-  font-weight: 700;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.modal-disclaimer {
-  margin-top: 16px;
-  padding-top: 16px;
-  text-align: center;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  font-style: italic;
 }
 
 .modal-link-row {
